@@ -10,40 +10,60 @@ param(
 )
 
 # Split $Name
-$FirstName=$Name.split(' ')[0]
-$Surname=$Name.split(' ')[1]
+$SplitName = $Name -split ' '
+if ($SplitName.Count -lt 2) {
+	throw "Name parameter has to contain a first name and a surname."
+}
+
+$FirstName = $SplitName[0]
+$Surname = $SplitName[-1]
 
 # Concat SamAccountName + UserPrincipalName
-$SamAccountName=$FirstName.Substring(0,1).ToLower() + '.' + $Surname.ToLower()
+$SamAccountName = $FirstName.Substring(0,1).ToLower() + '.' + $Surname.ToLower()
 
-$UserPrincipalName=$SamAccountName + '@' + $Domain
+$UserPrincipalName = $SamAccountName + '@' + $Domain
 
 # Split $Domain 
-$DomainName = $Domain.split('.')[0]
-$TopLevelDomain = $Domain.split('.')[1]
+$SplitDomain = $Domain -split '\.'
 
 # Build Path, input needs to match Child,Parent,Root structure
-$path = ''
-foreach ($Unit in $OU){
+$Path = ''
+foreach ($Unit in $OU) {
 	$path += 'OU=' + $Unit + ','
 }
 
-$path += 'DC=' + $DomainName + ',' + 'DC=' + $TopLevelDomain
+$DCParts = $SplitDomain | ForEach-Object { "DC=$_"}
+$DCPath = $DCParts -join ','
 
-# Create the user
-New-ADUser -Name $Name `
--GivenName $FirstName `
--Surname $Surname `
--SamAccountName $SamAccountName `
--UserPrincipalName $UserPrincipalName `
--Path $Path `
--AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
--ChangePasswordAtNextLogon $true `
--Enabled $true
+$Path += $DCPath
 
-# Add user to groups
-if ($Groups){
-	foreach ($Group in $Groups) {
-		Add-ADGroupMember -Identity $Group -Members $SamAccountName
+<# 
+# Password prmpt instead of the hard-coded password 
+# Change the -AccountPassword in the New-ADUser command
+$PasswordPrompt = Read-Host "Enter password for" $SamAccountName -AsSecureString
+#>
+
+try {
+	# Create the user
+	New-ADUser -Name $Name `
+	-GivenName $FirstName `
+	-Surname $Surname `
+	-SamAccountName $SamAccountName `
+	-UserPrincipalName $UserPrincipalName `
+	-Path $Path `
+	-AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
+	# -AccountPassword $PasswordPrompt `
+	-ChangePasswordAtNextLogon $true `
+	-Enabled $true
+	
+	# Add user to groups
+	if ($Groups){
+		foreach ($Group in $Groups) {
+			Add-ADGroupMember -Identity $Group -Members $SamAccountName
+		}
 	}
+}
+catch {
+    Write-Error "Failed to create user or add to groups: $_"
+    exit 1
 }
