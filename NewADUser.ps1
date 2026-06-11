@@ -9,7 +9,6 @@ param(
 	[string[]]$Groups
 )
 
-# Split $Name
 $SplitName = $Name -split ' '
 if ($SplitName.Count -lt 2) {
 	throw "Name parameter has to contain a first name and a surname."
@@ -23,7 +22,6 @@ $SamAccountName = $FirstName.Substring(0,1).ToLower() + '.' + $Surname.ToLower()
 
 $UserPrincipalName = $SamAccountName + '@' + $Domain
 
-# Split $Domain 
 $SplitDomain = $Domain -split '\.'
 
 # Build Path, input needs to match Child,Parent,Root structure
@@ -43,8 +41,8 @@ $Path += $DCPath
 $PasswordPrompt = Read-Host "Enter password for" $SamAccountName -AsSecureString
 #>
 
+# Create user and add to groups
 try {
-	# Create the user
 	New-ADUser -Name $Name `
 	-GivenName $FirstName `
 	-Surname $Surname `
@@ -56,7 +54,6 @@ try {
 	-ChangePasswordAtNextLogon $true `
 	-Enabled $true
 	
-	# Add user to groups
 	if ($Groups){
 		foreach ($Group in $Groups) {
 			Add-ADGroupMember -Identity $Group -Members $SamAccountName
