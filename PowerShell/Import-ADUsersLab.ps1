@@ -29,30 +29,6 @@ function Get-UPN ($Sam) {
 	return $Sam + '@' + $Domain
 }
 
-function New-RandomPassword {
-    param([int]$Length = 16)
-
-    $sets = @{
-        Upper  = 'ABCDEFGHJKLMNPQRSTUVWXYZ'   # no I/O/1/0 to avoid confusion
-        Lower  = 'abcdefghijkmnpqrstuvwxyz'
-        Digit  = '23456789'
-        Symbol = '!@#$%^&*-_=+'
-    }
-    $all = -join $sets.Values
-    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-
-    function Get-Index ([int]$max) {
-        $b = [byte[]]::new(4); $rng.GetBytes($b)
-        [int]([BitConverter]::ToUInt32($b,0) % $max)
-    }
-
-    # one guaranteed char per class, so AD complexity policy always passes
-    $chars = foreach ($s in $sets.Values) { $s[(Get-Index $s.Length)] }
-    for ($i = $chars.Count; $i -lt $Length; $i++) { $chars += $all[(Get-Index $all.Length)] }
-    $rng.Dispose()
-
-    -join ($chars | Sort-Object { Get-Index 1000000 })   # shuffle the guaranteed chars off the front
-}
 
 foreach ($User in $ADUsers) {
 	try {
@@ -64,8 +40,7 @@ foreach ($User in $ADUsers) {
 		$SamAccountName = $GivenName.Substring(0,1).ToLower() + '.' + $Surname.ToLower()
 		$SamAccountName = Get-ValidSam -Sam $SamAccountName
 
-		$PlainPassword = New-RandomPassword -Length 12
-		$SecurePassword = (ConvertTo-SecureString $PlainPassword -AsPlainText -Force)
+		$PlainPassword = "Password123!"
 		
 		$UserInfo = @{
 			Name = $User.name
@@ -73,22 +48,20 @@ foreach ($User in $ADUsers) {
 			Surname = $Surname
 			SamAccountName = $SamAccountName
 			UserPrincipalName = Get-UPN -Sam $SamAccountName
-			ChangePasswordAtLogon = $true
+			ChangePasswordAtLogon = $false
 			Enabled = $true
 			EmailAddress = Get-UPN -Sam $SamAccountName
 			Title = $User.title
 			Department = $User.department
-			# Change this - Hardcoded creds 
-			AccountPassword = $SecurePassword
+			AccountPassword = (ConvertTo-SecureString $PlainPassword -AsPlainText -Force)
 		}
-		# Change this to validate against UID
+		# Change this to validate against UID, broken atm
 		if (Get-ADUser -Filter "SamAccountName -eq '$SamAccountName'") {
 			Write-Host "A user with username $SamAccountName already exists in $Domain" -ForegroundColor Yellow
 			continue
 		}
 		if ($PSCmdlet.ShouldProcess($user.name, "Creating AD user")) {
 			New-ADUser @UserInfo
-			[pscustomobject]@{ User = $SamAccountName; Password = $plain }
 			Write-Host "The user $SamAccountName was created." -ForegroundColor Green
 		}
 		}
