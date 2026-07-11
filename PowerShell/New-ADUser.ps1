@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds the Nordvik OU tree under a given domain root.
+    Creates new individual ADUsers and adds them to groups 
 .PARAMETER Name
 	A first name and a surname.
 .PARAMETER Domain
@@ -51,8 +51,8 @@ $DCPath = $DCParts -join ','
 $Path += $DCPath
 
 <# 
-# Password prmpt instead of the hard-coded password 
-# Change the -AccountPassword in the New-ADUser command
+Password prmpt instead of the hard-coded password 
+Change the -AccountPassword in the New-ADUser command
 $PasswordPrompt = Read-Host "Enter password for" $SamAccountName -AsSecureString
 #>
 

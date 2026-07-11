@@ -1,12 +1,13 @@
 <#
 .SYNOPSIS
-    Builds the Nordvik OU tree under a given domain root.
+    Builds the AD OU tree under a given domain root.
 .PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
 .EXAMPLE
     .\New-OUStructure.ps1 -Root "corp.nordvik.se" -WhatIf
 #>
 
+# -WhatIf gets inherited by child scopes, the "New-OU" function
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
 	[Parameter(Mandatory=$true)]
@@ -32,6 +33,7 @@ function New-OU {
     [CmdletBinding(SupportsShouldProcess=$true)]
     param($Nodes, $ParentDN)
 
+    # Gives the children the Name key for recursive function calls
     foreach ($Node in $Nodes){
         if ($Node -is [string]){
             $Node = @{Name = $Node}
@@ -41,7 +43,7 @@ function New-OU {
         if (Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$DN'"){
             Write-Error "Failed to create OU, $DN already exists."
         }
-        else{
+        else {
             if ($PSCmdlet.ShouldProcess($DN, "Creating OU")){
                 New-ADOrganizationalUnit -Name $Node.Name -Path $ParentDN -ProtectedFromAccidentalDeletion $true
             }
@@ -56,5 +58,5 @@ try{
     New-OU -Nodes $OrganizationalUnits -ParentDN $Domain
 }
 catch{
-    Write-Error "Error: $_"
+    Write-Error "$_.Exception.Message"
 }
