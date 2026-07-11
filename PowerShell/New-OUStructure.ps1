@@ -1,16 +1,13 @@
 <#
 .\New-OUStructure.ps1 -Root "domain.local"
 #>
-
-[CmdletBinding(SupportsShouldProcess=$true)]
-
 param(
 	[Parameter(Mandatory=$true)]
 	[string]$Root
 )
+Import-Module ActiveDirectory
 
 $RootSplit = $Root -split '\.'
-
 $DCParts = $RootSplit | ForEach-Object { "DC=$_"}
 $Domain = $DCParts -join ','
 
@@ -19,32 +16,43 @@ $OrganizationalUnits = @(
     @{Name = "Servers";  Children = @("DomainControllers", "MemberServers")}
     @{Name = "Workstations";  Children = @("NVCLIENT01")}
     @{Name = "Users";  Children = @("Management", @{ Name = "IT"; Children = @("Admins") }, "Consulting", "Finance", "HR")}
-    @{Name = "Disabled"; Children = @("")}
+    @{Name = "Disabled"; Children = @()}
     @{Name = "Groups"; Children = @("Security", "Distribution")}
 )
 
-function New-OU ($Data) {
-    foreach ($Parent in $Data){
-        foreach ($Child in $Parent.Children){
-            if ($Child -is [string]) {
-                if ($Child) {
-                    if ($ExtraParent){
-                        $OU = "OU=$Child,OU=$($Parent.Name),$ExtraParent$Domain"
-                        Write-Host $OU
-                    }
-                    else{
-                        $OU = "OU=$Child,OU=$($Parent.Name),$Domain"
-                        Write-Host $OU
-                    }
-                }
-                }
-            else {
-                $ExtraParent = "OU=$($Parent.Name),"
-                $NewRun = $Child
-                New-OU($NewRun)
-            }
+
+function New-OU {
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    param(
+        [Parameter(Mandatory=$true)]
+        $Nodes,
+        [Parameter(Mandatory=$true)]
+        $ParentDN
+    )
+
+    foreach ($Node in $Nodes){
+        if ($Node -is [string]){
+            $Node = @{Name = $Node}
         }
-    }
+        $DN = "OU=$($Node.Name),$ParentDN"
+        
+        if (Get-ADOrganizationalUnit -Filter "Name -eq $($Node.Name)"){
+            Write-Error "Failed to create OU $_, it already exists."
+            Continue
+        }
+
+        if ($PSCmdlet.ShouldProcess($DN, "Creating OU")){
+            New-ADOrganizationalUnit -Name $Node.Name -Path $ParentDN -ProtectedFromAccidentalDeletion $true
+        }
+
+        New-Ou -Nodes $Node.Children -ParentDN $DN
+    }   
 }
 
-New-OU($OrganizationalUnits)
+
+try{
+    New-OU -Nodes $OrganizationalUnits -ParentDN $Domain
+}
+catch{
+
+}
