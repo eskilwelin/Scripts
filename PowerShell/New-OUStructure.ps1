@@ -1,5 +1,10 @@
 <#
-.\New-OUStructure.ps1 -Root "domain.local"
+.SYNOPSIS
+    Builds the Nordvik OU tree under a given domain root.
+.PARAMETER Root
+    Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
+.EXAMPLE
+    .\New-OUStructure.ps1 -Root "corp.nordvik.se" -WhatIf
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]

@@ -1,4 +1,5 @@
 <#
+.EXAMPLE
 .\Import-ADUsers.ps1 -Path .\users.json -Domain nordvik.local
 #>
 

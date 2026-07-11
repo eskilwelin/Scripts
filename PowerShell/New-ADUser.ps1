@@ -1,5 +1,16 @@
 <#
-.\New-ADUser.ps1 -Name "Chad Klåd" -Domain "nordvik.local" -OU "IT","Employee","Stockholm" -Groups "GRP_Management","Administrators"
+.SYNOPSIS
+    Builds the Nordvik OU tree under a given domain root.
+.PARAMETER Name
+	A first name and a surname.
+.PARAMETER Domain
+    Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
+.PARAMETER OU
+	All organizational untis, input needs to match Child,Parent,Root structure.
+.PARAMETER Groups
+	All user groups, comma sepparated. 
+.EXAMPLE
+	.\New-ADUser.ps1 -Name "Chad Klåd" -Domain "nordvik.local" -OU "IT","Employee","Stockholm" -Groups "GRP_Management","Administrators"
 #>
 
 param(
