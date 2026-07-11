@@ -1,3 +1,7 @@
+<#
+.\New-ADUser.ps1 -Name "Chad Klåd" -Domain "nordvik.local" -OU "IT","Employee","Stockholm" -Groups "GRP_Management","Administrators"
+#>
+
 param(
 	[Parameter(Mandatory=$true)]
 	[string]$Name,

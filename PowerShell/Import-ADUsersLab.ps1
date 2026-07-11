@@ -1,3 +1,7 @@
+<#
+.\Import-ADUsersLab.ps1 -Path .\users.json -Domain nordvik.local
+#>
+
 [CmdletBinding(SupportsShouldProcess=$true)]
 
 param(
