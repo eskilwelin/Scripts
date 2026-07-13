@@ -63,7 +63,7 @@ foreach ($User in $ADUsers) {
 		if ($PSCmdlet.ShouldProcess($user.name, "Creating AD user")) {
 			New-ADUser @UserInfo
 			Write-Host "The user $SamAccountName was created." -ForegroundColor Green
-		}
+		} 
 		}
 	catch {
 		Write-Host "Failed to create user $SamAccountName - $_" -ForegroundColor Red
