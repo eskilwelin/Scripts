@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Creates new individual ADUsers and adds them to groups 
+.PARAMETER Name
+	A first name and a surname.
+.PARAMETER Domain
+    Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
+.PARAMETER OU
+	All organizational untis, input needs to match Child,Parent,Root structure.
+.PARAMETER Groups
+	All user groups, comma sepparated. 
+.EXAMPLE
+	.\New-ADUser.ps1 -Name "Chad Klåd" -Domain "nordvik.local" -OU "IT","Employee","Stockholm" -Groups "GRP_Management","Administrators"
+#>
+
 param(
 	[Parameter(Mandatory=$true)]
 	[string]$Name,
@@ -36,8 +51,8 @@ $DCPath = $DCParts -join ','
 $Path += $DCPath
 
 <# 
-# Password prmpt instead of the hard-coded password 
-# Change the -AccountPassword in the New-ADUser command
+Password prmpt instead of the hard-coded password 
+Change the -AccountPassword in the New-ADUser command
 $PasswordPrompt = Read-Host "Enter password for" $SamAccountName -AsSecureString
 #>
 

@@ -1,3 +1,8 @@
+<#
+.EXAMPLE
+.\Import-ADUsers.ps1 -Path .\users.json -Domain nordvik.local
+#>
+
 [CmdletBinding(SupportsShouldProcess=$true)]
 
 param(
@@ -11,18 +16,17 @@ Import-Module ActiveDirectory
 
 $ADUsers = Get-Content -Raw $Path | ConvertFrom-Json
 
-function Get-ValidSam ($Sam) {
-	$IncrementSam = 1
-    $NewSam = $Sam
-	while ($true) {
-        if (Get-ADUser -Filter "SamAccountName -eq '$NewSam'") {
-            $NewSam = $Sam + $IncrementSam
-	    }
-        else {
-			return $NewSam
-        }
-		$IncrementSam ++
-    }
+function Get-ValidSam ($FirstName, $LastName) {
+	$Base = ($FirstName.Substring(0,1) + '.' + $LastName).ToLower()
+	if ($Base.length -gt 17) {$Base = $Base.Substring(0,17)}
+		
+	$Increment = 1
+    $Sam = $Base
+	while (Get-ADUser -Filter "SamAccountName -eq '$Sam'") {
+        $Sam = $Base + $Increment
+		$Increment ++
+	}
+	return $Sam
 }
 
 function Get-UPN ($Sam) {
@@ -60,9 +64,7 @@ foreach ($User in $ADUsers) {
 		$GivenName = $SplitName[0]
 		$Surname = $SplitName[-1]
 
-		# Validate Sam 
-		$SamAccountName = $GivenName.Substring(0,1).ToLower() + '.' + $Surname.ToLower()
-		$SamAccountName = Get-ValidSam -Sam $SamAccountName
+		$SamAccountName = Get-ValidSam -FirstName $GivenName -LastName $Surname
 
 		$PlainPassword = New-RandomPassword -Length 12
 		$SecurePassword = (ConvertTo-SecureString $PlainPassword -AsPlainText -Force)
@@ -73,6 +75,7 @@ foreach ($User in $ADUsers) {
 			Surname = $Surname
 			SamAccountName = $SamAccountName
 			UserPrincipalName = Get-UPN -Sam $SamAccountName
+			employeeID = $User.employeeID
 			ChangePasswordAtLogon = $true
 			Enabled = $true
 			EmailAddress = Get-UPN -Sam $SamAccountName
@@ -81,9 +84,8 @@ foreach ($User in $ADUsers) {
 			# Change this - Hardcoded creds 
 			AccountPassword = $SecurePassword
 		}
-		# Change this to validate against UID
-		if (Get-ADUser -Filter "SamAccountName -eq '$SamAccountName'") {
-			Write-Host "A user with username $SamAccountName already exists in $Domain" -ForegroundColor Yellow
+		if ($User.eployeeID -and (Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
+			Write-Host "A user with uid $($User.employeeID) already exists in $Domain" -ForegroundColor Yellow
 			continue
 		}
 		if ($PSCmdlet.ShouldProcess($user.name, "Creating AD user")) {
