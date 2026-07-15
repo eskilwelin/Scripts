@@ -81,7 +81,6 @@ foreach ($User in $ADUsers) {
 			EmailAddress = Get-UPN -Sam $SamAccountName
 			Title = $User.title
 			Department = $User.department
-			# Change this - Hardcoded creds 
 			AccountPassword = $SecurePassword
 		}
 		if ($User.eployeeID -and (Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
