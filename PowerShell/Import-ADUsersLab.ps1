@@ -68,6 +68,6 @@ foreach ($User in $ADUsers) {
 		} 
 		}
 	catch {
-		Write-Host "Failed to create user $SamAccountName - $_" -ForegroundColor Red
+		Write-Host "Failed to populate information for user $SamAccountName - $_" -ForegroundColor Red
 	}
 }

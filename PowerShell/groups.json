@@ -1,3 +1,56 @@
 [
-  {}
+  {
+    "name": "GRP_IT_Admins",
+    "scope": "Global",
+    "category": "Security",
+    "description": "IT administrators - full admin on servers"
+  },
+  {
+    "name": "GRP_IT_Helpdesk",
+    "scope": "Global",
+    "category": "Security",
+    "description": "Helpdesk - limited admin, password resets"
+  },
+  {
+    "name": "GRP_Finance_Users",
+    "scope": "Global",
+    "category": "Security",
+    "description": "Finance department staff"
+  },
+  {
+    "name": "GRP_HR_Users",
+    "scope": "Global",
+    "category": "Security",
+    "description": "HR department staff"
+  },
+  {
+    "name": "GRP_Consulting_Users",
+    "scope": "Global",
+    "category": "Security",
+    "description": "Consulting department staff"
+  },
+  {
+    "name": "GRP_All_Staff",
+    "scope": "Global",
+    "category": "Security",
+    "description": "All employees - shared company resources"
+  },
+  {
+    "name": "GRP_Management",
+    "scope": "Global",
+    "category": "Security",
+    "description": "Management team"
+  },
+  {
+    "name": "GRP_VPN_Users",
+    "scope": "Global",
+    "category": "Security",
+    "description": "Simulated VPN access - IT and Management"
+  },
+  {
+    "name": "GRP_ServiceAccounts",
+    "scope": "Global",
+    "category": "Security",
+    "description": "Organisational group for service accounts"
+  }
 ]
