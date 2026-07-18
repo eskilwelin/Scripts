@@ -1,6 +1,14 @@
 <#
+.SYNOPSIS
+    Imports and creates Users from a JSON-file and assigns group memeberships. Can be used to assign new group memeberships to existing users. 
+.PARAMETER Import
+	Path to JSON-file containing user information.
+.PARAMETER Root
+    Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
+.PARAMETER OrgName
+	Organization name, needed for the top level OU structure. 
 .EXAMPLE
-.\Import-ADUsersLab.ps1 -Import .\users.json -Root "nordvik.local" -OrgName "Nordvik"
+.\Import-ADUsersLab.ps1 -Import .\users.json -Root "nordvik.local" -OrgName "Nordvik" -WhatIf
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]
@@ -95,18 +103,26 @@ foreach ($User in $ADUsers) {
 			Path = (Get-Path($User.department))
 		}
 
-		if ($User.employeeID -and (Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
-			Write-Host "A user with uid $($User.employeeID) already exists in $Domain" -ForegroundColor Yellow
-			continue
+		if ($User.employeeID -and ($ExistingUser = Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
+			$SamAccountName = $ExistingUser.SamAccountName
+			Write-Verbose "A user with uid $($User.employeeID) already exists in $Domain"
 		}
-
-		if ($PSCmdlet.ShouldProcess($user.name, "Creating AD user")) {
-			New-ADUser @UserInfo
-			Write-Host "The user $SamAccountName was created." -ForegroundColor Green
-		} 
-
+		else {
+			if ($PSCmdlet.ShouldProcess($User.name, "Creating AD user")) {
+				New-ADUser @UserInfo
+				Write-Verbose "The user $SamAccountName was created."
+			} 
+		}
+		if ($User.groups){
+			foreach ($Group in $User.groups){
+				if ($PSCmdlet.ShouldProcess($Group, "Adding $($User.Name) to group")){
+					Add-ADGroupMember -Identity $Group -Members $SamAccountName
+					Write-Verbose "Adding $SamAccountName to $Group"
+				}
+			}
+		}
 		}
 	catch {
-		Write-Host "Failed to populate information for user $SamAccountName - $($_.Exception.Message)" -ForegroundColor Red
+		Write-Verbose "Failed to populate information for user $SamAccountName - $($_.Exception.Message)"
 	}
 }
