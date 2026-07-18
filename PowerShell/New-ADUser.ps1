@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Creates new individual ADUsers and adds them to groups 
+    Creates new individual ADUsers and adds them to any given groups 
 .PARAMETER Name
 	A first name and a surname.
 .PARAMETER Domain

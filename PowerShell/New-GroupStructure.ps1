@@ -1,16 +1,17 @@
 <#
 .SYNOPSIS
-    Creates the top level security group structure
+    Creates the top level group structure under a given top level OU and domain root.
 .PARAMETER Domain
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
 .EXAMPLE
-    .\New-GroupStructure.ps1 -Path .\groups.json -Domain "corp.nordvik.se"
+    .\New-GroupStructure.ps1 -Path .\groups.json -Domain "corp.nordvik.se" -OrgName "Nordvik"
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
     [parameter(Mandatory=$true)][string]$Path,
-    [parameter(Mandatory=$true)][string]$Domain
+    [parameter(Mandatory=$true)][string]$Domain,
+    [parameter(Mandatory=$true)][string]$OrgName
 )
 
 Import-Module ActiveDirectory
@@ -25,7 +26,7 @@ foreach ($Group in $ADGroups){
     Try{
         $Category = $Group.category
         if ($Category -eq "Security" -or $Category -eq "Distribution") {
-            $OU = "OU=$Category,OU=Groups,$DCJoined"
+            $OU = "OU=$Category,OU=Groups,OU=$OrgName,$DCJoined"
         }
         else{
             Write-Verbose "Invalid category: $Category"

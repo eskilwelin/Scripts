@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Builds the AD OU tree under a given domain root.
+    Builds the AD OU tree under a given top level OU and domain root.
 .PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
 .PARAMETER OrgName
-    Organization Name used to derive the top level OU 
+    Organization Name used to derive the top level OU.
 .EXAMPLE
     .\New-OUStructure.ps1 -Root "corp.nordvik.se" -OrgName "Nordvik" -WhatIf
 #>
@@ -42,7 +42,7 @@ function New-OU {
     [CmdletBinding(SupportsShouldProcess=$true)]
     param($Nodes, $ParentDN)
 
-    # Gives the children the Name key for recursive function calls
+    # Gives the children the "Name" key for the recursive function calls
     foreach ($Node in $Nodes){
         if ($Node -is [string]){
             $Node = @{Name = $Node}
