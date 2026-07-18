@@ -3,15 +3,17 @@
     Builds the AD OU tree under a given domain root.
 .PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
+.PARAMETER OrgName
+    Organization Name used to derive the top level OU 
 .EXAMPLE
-    .\New-OUStructure.ps1 -Root "corp.nordvik.se" -WhatIf
+    .\New-OUStructure.ps1 -Root "corp.nordvik.se" -OrgName "Nordvik" -WhatIf
 #>
 
 # -WhatIf gets inherited by child scopes, the "New-OU" function
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
-	[Parameter(Mandatory=$true)]
-	[string]$Root
+	[Parameter(Mandatory=$true)][string]$Root,
+    [Parameter(Mandatory=$true)][string]$OrgName
 )
 Import-Module ActiveDirectory
 
@@ -19,6 +21,13 @@ $RootSplit = $Root -split '\.'
 $DCParts = $RootSplit | ForEach-Object { "DC=$_"}
 $Domain = $DCParts -join ','
 
+$BaseOU = "OU=$OrgName,$Domain"
+
+if (!(Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$BaseOU'")){
+    if ($PSCmdlet.ShouldProcess($BaseOU, "Creating OU")){
+        New-ADOrganizationalUnit -Name $OrgName -Path $Domain -ProtectedFromAccidentalDeletion $true
+    }
+}
 
 $OrganizationalUnits = @(
     @{Name = "Servers";  Children = @("DomainControllers", "MemberServers")}
@@ -41,7 +50,7 @@ function New-OU {
         $DN = "OU=$($Node.Name),$ParentDN"
         
         if (Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$DN'"){
-            Write-Error "Failed to create OU, $DN already exists."
+            Write-Verbose "OU already exists, skipping: $DN."
         }
         else {
             if ($PSCmdlet.ShouldProcess($DN, "Creating OU")){
@@ -53,10 +62,9 @@ function New-OU {
     }   
 }
 
-
 try{
-    New-OU -Nodes $OrganizationalUnits -ParentDN $Domain
+    New-OU -Nodes $OrganizationalUnits -ParentDN $BaseOU
 }
 catch{
-    Write-Error "$_.Exception.Message"
+    Write-Error "$($_.Exception.Message)"
 }

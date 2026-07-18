@@ -14,14 +14,10 @@
 #>
 
 param(
-	[Parameter(Mandatory=$true)]
-	[string]$Name,
-	[Parameter(Mandatory=$true)]
-	[string]$Domain,
-	[Parameter(Mandatory=$true)]
-	[string[]]$OU,
-	[Parameter(Mandatory=$false)]
-	[string[]]$Groups
+	[Parameter(Mandatory=$true)][string]$Name,
+	[Parameter(Mandatory=$true)][string]$Domain,
+	[Parameter(Mandatory=$true)][string[]]$OU,
+	[Parameter(Mandatory=$false)][string[]]$Groups
 )
 
 $SplitName = $Name -split ' '
@@ -76,6 +72,6 @@ try {
 	}
 }
 catch {
-    Write-Error "Failed to create user or add to groups: $_"
+    Write-Error "Failed to create user or add to groups: $($_.Exception.Message)"
     exit 1
 }

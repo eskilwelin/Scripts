@@ -6,10 +6,8 @@
 [CmdletBinding(SupportsShouldProcess=$true)]
 
 param(
-	[Parameter(Mandatory=$true)]
-	[string]$Path,
-	[Parameter(Mandatory=$true)]
-	[string]$Domain	
+	[Parameter(Mandatory=$true)][string]$Path,
+	[Parameter(Mandatory=$true)][string]$Domain	
 )
 
 Import-Module ActiveDirectory
