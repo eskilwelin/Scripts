@@ -1,0 +1,191 @@
+[
+  {
+    "name": "Anna Lindqvist",
+    "department": "Management",
+    "title": "CEO",
+    "employeeID": "1001",
+    "groups": ["GRP_Management", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Marcus Bergström",
+    "department": "Management",
+    "title": "COO",
+    "employeeID": "1002",
+    "groups": ["GRP_Management", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Sofia Karlsson",
+    "department": "Management",
+    "title": "CFO",
+    "employeeID": "1003",
+    "groups": ["GRP_Management", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Erik Johansson",
+    "department": "IT",
+    "title": "IT Manager",
+    "employeeID": "1004",
+    "groups": ["GRP_IT_Admins", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Lena Petersson",
+    "department": "IT",
+    "title": "Sysadmin",
+    "employeeID": "1005",
+    "groups": ["GRP_IT_Admins", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Jonas Nilsson",
+    "department": "IT",
+    "title": "Network Engineer",
+    "employeeID": "1006",
+    "groups": ["GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Maja Svensson",
+    "department": "IT",
+    "title": "Helpdesk",
+    "employeeID": "1007",
+    "groups": ["GRP_IT_Helpdesk", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Oscar Fransson",
+    "department": "IT",
+    "title": "Helpdesk",
+    "employeeID": "1008",
+    "groups": ["GRP_IT_Helpdesk", "GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "David Holm",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1009",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Klara Åberg",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1010",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Tobias Engström",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1011",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Frida Lund",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1012",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Simon Björk",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1013",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Elin Gustafsson",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1014",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Hugo Magnusson",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1015",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Nora Strand",
+    "department": "Consulting",
+    "title": "Consultant",
+    "employeeID": "1016",
+    "groups": ["GRP_Consulting_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Lars Hedström",
+    "department": "Finance",
+    "title": "Financial Analyst",
+    "employeeID": "1017",
+    "groups": ["GRP_Finance_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Cecilia Olofsson",
+    "department": "Finance",
+    "title": "Financial Analyst",
+    "employeeID": "1018",
+    "groups": ["GRP_Finance_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Viktor Lundgren",
+    "department": "Finance",
+    "title": "Financial Analyst",
+    "employeeID": "1019",
+    "groups": ["GRP_Finance_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Sara Thorén",
+    "department": "Finance",
+    "title": "Financial Analyst",
+    "employeeID": "1020",
+    "groups": ["GRP_Finance_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Johanna Persson",
+    "department": "HR",
+    "title": "HR Specialist",
+    "employeeID": "1021",
+    "groups": ["GRP_HR_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Andreas Rydén",
+    "department": "HR",
+    "title": "HR Specialist",
+    "employeeID": "1022",
+    "groups": ["GRP_HR_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Matilda Söderberg",
+    "department": "HR",
+    "title": "HR Specialist",
+    "employeeID": "1023",
+    "groups": ["GRP_HR_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "svc_backup",
+    "department": "IT",
+    "title": "Backup service account",
+    "employeeID": "1024",
+    "groups": ["GRP_ServiceAccounts"]
+  },
+  {
+    "name": "svc_monitoring",
+    "department": "IT",
+    "title": "Monitoring service account",
+    "employeeID": "1025",
+    "groups": ["GRP_ServiceAccounts"]
+  },
+  {
+    "name": "Eskil Welin",
+    "department": "IT",
+    "title": "Daily Drive Account",
+    "employeeID": "9001",
+    "groups": ["GRP_VPN_Users", "GRP_All_Staff"]
+  },
+  {
+    "name": "Eskil Welin-Admin",
+    "department": "Admins",
+    "title": "Sysadmin",
+    "employeeID": "9002",
+    "groups": ["GRP_IT_Admins", "GRP_VPN_Users", "GRP_All_Staff"]
+  }
+]

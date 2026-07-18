@@ -1,32 +1,43 @@
 <#
 .SYNOPSIS
     Creates the top level group structure under a given top level OU and domain root.
-.PARAMETER Domain
+.PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
 .EXAMPLE
-    .\New-GroupStructure.ps1 -Path .\groups.json -Domain "corp.nordvik.se" -OrgName "Nordvik"
+    .\New-GroupStructure.ps1 -Import .\groups.json -Root "corp.nordvik.se" -OrgName "Nordvik"
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
-    [parameter(Mandatory=$true)][string]$Path,
-    [parameter(Mandatory=$true)][string]$Domain,
+    [parameter(Mandatory=$true)][string]$Import,
+    [parameter(Mandatory=$true)][string]$Root,
     [parameter(Mandatory=$true)][string]$OrgName
 )
 
 Import-Module ActiveDirectory
 
-$RootSplit = $Domain -split '\.'
-$DCParts = $RootSplit | ForEach-Object { "DC=$_"}
-$DCJoined = $DCParts -join ','
+function Get-OU{
+	param(
+		[Parameter(Mandatory=$true)][string]$Root,
+		[Parameter(Mandatory=$true)][string]$OrgName
+	)
+	$RootSplit = $Root -split '\.'
+	$DCParts = $RootSplit | ForEach-Object { "DC=$_"}
+	$Domain = $DCParts -join ','
 
-$ADGroups = Get-Content -Raw $Path | ConvertFrom-Json
+	$BaseOU = "OU=$OrgName,$Domain"
+	return $BaseOU, $Domain
+}
+
+$BaseOU, $Domain = (Get-OU -DomainRoot $Root -OrgName $OrgName)
+
+$ADGroups = Get-Content -Raw $Import | ConvertFrom-Json
 
 foreach ($Group in $ADGroups){
     Try{
         $Category = $Group.category
         if ($Category -eq "Security" -or $Category -eq "Distribution") {
-            $OU = "OU=$Category,OU=Groups,OU=$OrgName,$DCJoined"
+            $Path = "OU=$Category,OU=Groups,OU=$OrgName,$Domain"
         }
         else{
             Write-Verbose "Invalid category: $Category"
@@ -37,7 +48,7 @@ foreach ($Group in $ADGroups){
             Name = $Group.name
             GroupScope = $Group.scope
             GroupCategory = $Category
-            Path = $OU
+            Path = $Path
             Description = $Group.description
         }
 

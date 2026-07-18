@@ -1,20 +1,41 @@
 <#
 .EXAMPLE
-.\Import-ADUsersLab.ps1 -Path .\users.json -Domain nordvik.local
+.\Import-ADUsersLab.ps1 -Import .\users.json -Root "nordvik.local" -OrgName "Nordvik"
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]
 
 param(
-	[Parameter(Mandatory=$true)][string]$Path,
-	[Parameter(Mandatory=$true)][string]$Domain	
+	[Parameter(Mandatory=$true)][string]$Import,
+	[Parameter(Mandatory=$true)][string]$Root,
+	[Parameter(Mandatory=$true)][string]$OrgName	
 )
 
 Import-Module ActiveDirectory
 
-$ADUsers = Get-Content -Raw $Path | ConvertFrom-Json
+$ADUsers = (Get-Content -Raw $Import | ConvertFrom-Json)
 
-function Get-ValidSam ($FirstName, $LastName) {
+function Get-OU{
+	param(
+		[Parameter(Mandatory=$true)][string]$Root,
+		[Parameter(Mandatory=$true)][string]$OrgName
+	)
+	$RootSplit = $Root -split '\.'
+	$DCParts = $RootSplit | ForEach-Object { "DC=$_"}
+	$Domain = $DCParts -join ','
+
+	$BaseOU = "OU=$OrgName,$Domain"
+	return $BaseOU, $Domain
+}
+
+$BaseOU, $Domain = (Get-OU -Root $Root -OrgName $OrgName)
+
+function Get-ValidSam {
+	param(
+		[Parameter(Mandatory=$true)][string]$FirstName,
+		[Parameter(Mandatory=$true)][string]$LastName
+	)
+
 	$Base = ($FirstName.Substring(0,1) + '.' + $LastName).ToLower()
 	if ($Base.length -gt 18) {$Base = $Base.Substring(0,18)}
 		
@@ -27,10 +48,26 @@ function Get-ValidSam ($FirstName, $LastName) {
 	return $Sam
 }
 
-function Get-UPN ($Sam) {
+function Get-UPN {
+	param([Parameter(Mandatory=$true)][string]$Sam)
+
 	return $Sam + '@' + $Domain
 }
 
+function Get-Path {
+	param([Parameter(Mandatory=$true)][string]$Department)
+
+	$Path = (Get-ADOrganizationalUnit -Filter "Name -Like '$Department'" -SearchBase "$BaseOU" | Select-Object -ExpandProperty DistinguishedName)
+	if (@($Path).Count -eq 0){
+		throw "Department '$Department' has 0 matching OUs"
+	}
+	elseif (@($Path).Count -gt 1){
+		throw "Department '$Department' has more than 1 matching OUs"
+	}
+	else{
+		return $Path
+	}
+}
 
 foreach ($User in $ADUsers) {
 	try {
@@ -38,7 +75,7 @@ foreach ($User in $ADUsers) {
 		$GivenName = $SplitName[0]
 		$Surname = $SplitName[-1]
 
-		$SamAccountName = Get-ValidSam -FirstName $GivenName -LastName $Surname
+		$SamAccountName = (Get-ValidSam -FirstName $GivenName -LastName $Surname)
 
 		$PlainPassword = "Password123!"
 		
@@ -47,25 +84,29 @@ foreach ($User in $ADUsers) {
 			GivenName = $GivenName
 			Surname = $Surname
 			SamAccountName = $SamAccountName
-			UserPrincipalName = Get-UPN -Sam $SamAccountName
+			UserPrincipalName = (Get-UPN -Sam $SamAccountName)
 			employeeID = $User.employeeID
 			ChangePasswordAtLogon = $false
 			Enabled = $true
-			EmailAddress = Get-UPN -Sam $SamAccountName
+			EmailAddress = (Get-UPN -Sam $SamAccountName)
 			Title = $User.title
 			Department = $User.department
 			AccountPassword = (ConvertTo-SecureString $PlainPassword -AsPlainText -Force)
+			Path = (Get-Path($User.department))
 		}
-		if ($User.eployeeID -and (Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
+
+		if ($User.employeeID -and (Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
 			Write-Host "A user with uid $($User.employeeID) already exists in $Domain" -ForegroundColor Yellow
 			continue
 		}
+
 		if ($PSCmdlet.ShouldProcess($user.name, "Creating AD user")) {
 			New-ADUser @UserInfo
 			Write-Host "The user $SamAccountName was created." -ForegroundColor Green
 		} 
+
 		}
 	catch {
-		Write-Host "Failed to populate information for user $SamAccountName - $_" -ForegroundColor Red
+		Write-Host "Failed to populate information for user $SamAccountName - $($_.Exception.Message)" -ForegroundColor Red
 	}
 }

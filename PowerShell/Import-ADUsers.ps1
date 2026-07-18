@@ -1,18 +1,20 @@
 <#
+Script out of date, need to update it with the new logic changes to the Lab version
+
 .EXAMPLE
-.\Import-ADUsers.ps1 -Path .\users.json -Domain nordvik.local
+.\Import-ADUsers.ps1 -Import .\users.json -Domain nordvik.local
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]
 
 param(
-	[Parameter(Mandatory=$true)][string]$Path,
+	[Parameter(Mandatory=$true)][string]$Import,
 	[Parameter(Mandatory=$true)][string]$Domain	
 )
 
 Import-Module ActiveDirectory
 
-$ADUsers = Get-Content -Raw $Path | ConvertFrom-Json
+$ADUsers = Get-Content -Raw $Import | ConvertFrom-Json
 
 function Get-ValidSam ($FirstName, $LastName) {
 	$Base = ($FirstName.Substring(0,1) + '.' + $LastName).ToLower()

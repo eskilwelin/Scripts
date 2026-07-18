@@ -15,13 +15,23 @@ param(
 	[Parameter(Mandatory=$true)][string]$Root,
     [Parameter(Mandatory=$true)][string]$OrgName
 )
+
 Import-Module ActiveDirectory
 
-$RootSplit = $Root -split '\.'
-$DCParts = $RootSplit | ForEach-Object { "DC=$_"}
-$Domain = $DCParts -join ','
+function Get-OU{
+	param(
+		[Parameter(Mandatory=$true)][string]$Root,
+		[Parameter(Mandatory=$true)][string]$OrgName
+	)
+	$RootSplit = $Root -split '\.'
+	$DCParts = $RootSplit | ForEach-Object { "DC=$_"}
+	$Domain = $DCParts -join ','
 
-$BaseOU = "OU=$OrgName,$Domain"
+	$BaseOU = "OU=$OrgName,$Domain"
+	return $BaseOU, $Domain
+}
+
+$BaseOU, $Domain = (Get-OU -DomainRoot $Root -OrgName $OrgName)
 
 if (!(Get-ADOrganizationalUnit -Filter "distinguishedName -eq '$BaseOU'")){
     if ($PSCmdlet.ShouldProcess($BaseOU, "Creating OU")){
@@ -55,6 +65,7 @@ function New-OU {
         else {
             if ($PSCmdlet.ShouldProcess($DN, "Creating OU")){
                 New-ADOrganizationalUnit -Name $Node.Name -Path $ParentDN -ProtectedFromAccidentalDeletion $true
+                Write-Verbose "The OU $($Node.Name) was created."
             }
         }
         
