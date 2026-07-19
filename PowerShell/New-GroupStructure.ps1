@@ -1,8 +1,12 @@
 <#
 .SYNOPSIS
     Creates the top level group structure under a given top level OU and domain root.
+.PARAMETER Import
+    Path to the JSON file containing group information.
 .PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
+.PARAMETER OrgName
+    Organization Name used to derive the top level OU.
 .EXAMPLE
     .\New-GroupStructure.ps1 -Import .\groups.json -Root "corp.nordvik.se" -OrgName "Nordvik"
 #>

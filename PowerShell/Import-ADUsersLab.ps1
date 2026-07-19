@@ -1,14 +1,16 @@
 <#
 .SYNOPSIS
-    Imports and creates Users from a JSON-file and assigns group memeberships. Can be used to assign new group memeberships to existing users. 
+    Imports and creates users from a JSON file into an OU derived from the "department" field.
+    Assigns group memberships to users — also applies to existing users on re-run, 
+	so membership changes in the JSON take effect without needing a full user recreation.
 .PARAMETER Import
-	Path to JSON-file containing user information.
+    Path to the JSON file containing user information.
 .PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
 .PARAMETER OrgName
-	Organization name, needed for the top level OU structure. 
+    Organization name, needed for the top-level OU structure.
 .EXAMPLE
-.\Import-ADUsersLab.ps1 -Import .\users.json -Root "nordvik.local" -OrgName "Nordvik" -WhatIf
+    .\Import-ADUsersLab.ps1 -Import .\users.json -Root "nordvik.local" -OrgName "Nordvik" -WhatIf
 #>
 
 [CmdletBinding(SupportsShouldProcess=$true)]
@@ -43,7 +45,6 @@ function Get-ValidSam {
 		[Parameter(Mandatory=$true)][string]$FirstName,
 		[Parameter(Mandatory=$true)][string]$LastName
 	)
-
 	$Base = ($FirstName.Substring(0,1) + '.' + $LastName).ToLower()
 	if ($Base.length -gt 18) {$Base = $Base.Substring(0,18)}
 		
@@ -58,7 +59,6 @@ function Get-ValidSam {
 
 function Get-UPN {
 	param([Parameter(Mandatory=$true)][string]$Sam)
-
 	return $Sam + '@' + $Domain
 }
 
@@ -102,7 +102,6 @@ foreach ($User in $ADUsers) {
 			AccountPassword = (ConvertTo-SecureString $PlainPassword -AsPlainText -Force)
 			Path = (Get-Path($User.department))
 		}
-
 		if ($User.employeeID -and ($ExistingUser = Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
 			$SamAccountName = $ExistingUser.SamAccountName
 			Write-Verbose "A user with uid $($User.employeeID) already exists in $Domain"
@@ -115,7 +114,7 @@ foreach ($User in $ADUsers) {
 		}
 		if ($User.groups){
 			foreach ($Group in $User.groups){
-				if ($PSCmdlet.ShouldProcess($Group, "Adding $($User.Name) to group")){
+				if ($PSCmdlet.ShouldProcess($Group, "Adding $SamAccountName to group")){
 					Add-ADGroupMember -Identity $Group -Members $SamAccountName
 					Write-Verbose "Adding $SamAccountName to $Group"
 				}

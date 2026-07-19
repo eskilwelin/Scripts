@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds the AD OU tree under a given top level OU and domain root.
+    Builds the AD OU tree under a given top level OU, derived from -OrgName, and domain root.
 .PARAMETER Root
     Domain in dotted form, e.g. corp.nordvik.se. Converted to DC= parts internally.
 .PARAMETER OrgName
