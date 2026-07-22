@@ -126,7 +126,7 @@ foreach ($User in $ADUsers) {
 			Title = $User.title
 			Department = $User.department
 			AccountPassword = $SecurePassword
-			Path = (Get-Path($User.department))
+			Path = (Get-Path -Department $User.department)
 		}
 		if ($User.employeeID -and ($ExistingUser = Get-ADUser -Filter "employeeID -eq '$($User.employeeID)'")) {
 			$SamAccountName = $ExistingUser.SamAccountName
